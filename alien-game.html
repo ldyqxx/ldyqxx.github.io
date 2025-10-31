@@ -135,7 +135,7 @@
             <div class="score-item">生命: <span id="lives">3</span></div>
             <div class="score-item">等級: <span id="level">1</span></div>
         </div>
-        <a href="lll.html" class="back-link">返回主頁</a>
+        <a href="/lll.html" class="back-link">返回主頁</a>
     </div>
 
     <div id="startScreen">
@@ -195,11 +195,17 @@
         const alienPadding = 10;
         const alienOffsetTop = 50;
         const alienOffsetLeft = 70;
+        const ALIEN_MOVE_STEP = 10; // pixels to move per step
 
         // Animation frame
         let animationId;
         let lastAlienMoveTime = 0;
         const alienMoveInterval = 500; // milliseconds
+
+        // Star field animation constants
+        const STAR_X_MULTIPLIER = 37;
+        const STAR_Y_MULTIPLIER = 59;
+        const STAR_SPEED = 0.01;
 
         // Initialize game
         function init() {
@@ -307,8 +313,8 @@
         function drawStars() {
             ctx.fillStyle = '#ffffff';
             for (let i = 0; i < 50; i++) {
-                const x = (i * 37) % canvas.width;
-                const y = (i * 59 + Date.now() * 0.01) % canvas.height;
+                const x = (i * STAR_X_MULTIPLIER) % canvas.width;
+                const y = (i * STAR_Y_MULTIPLIER + Date.now() * STAR_SPEED) % canvas.height;
                 ctx.fillRect(x, y, 2, 2);
             }
         }
@@ -356,7 +362,7 @@
                 } else {
                     aliens.forEach(alien => {
                         if (alien.alive) {
-                            alien.x += alienDirection * 10;
+                            alien.x += alienDirection * ALIEN_MOVE_STEP;
                         }
                     });
                 }
