@@ -32,10 +32,11 @@
             <div class="controls"><input id="symbol" value="AAPL" aria-label="股票代码"><select id="horizon" aria-label="预测周期"><option value="5">未来 5 个交易日</option><option value="10">未来 10 个交易日</option><option value="20">未来 20 个交易日</option></select><button id="run">运行预测 →</button></div>
             <section class="grid"><div class="card"><div class="label">当前价格</div><div class="value" id="current">—</div></div><div class="card"><div class="label">预测价格</div><div class="value" id="predicted">—</div></div><div class="card"><div class="label">预期变化</div><div class="value positive" id="change">—</div></div><div class="card"><div class="label">模型置信度</div><div class="value" id="confidence">—</div></div></section>
             <section class="card chart-card"><div class="chart-head"><h2 id="chartTitle">价格路径</h2><span id="status">准备就绪</span></div><canvas id="chart" width="1100" height="290"></canvas></section>
-            <p class="notice">⚠ 预测结果仅用于研究与教育，不构成投资建议，也不保证未来收益。演示数据不是实时行情。</p>
+            <p class="notice">⚠ 数据由 Yahoo Finance 提供；预测为基于近期收盘价的趋势基线，仅用于研究与教育，不构成投资建议，也不保证未来收益。</p>
         </section>
         <footer id="method">QuantLab Research · 在生产环境中请接入合规行情源、经过验证的模型和严格的风险管理。</footer>
     </main>
+    <script src="/api-config.js"></script>
     <script>
         const API_URL = window.QUANT_API_URL || "";
         const $ = id => document.getElementById(id);

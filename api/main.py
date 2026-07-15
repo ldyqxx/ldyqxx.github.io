@@ -1,16 +1,17 @@
+import os
 from datetime import date, timedelta
-from math import sin
-from random import Random
 from typing import Literal
 
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+import yfinance as yf
 
 app = FastAPI(title="Quant Forecast API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict this to the GitHub Pages URL in production.
+    allow_origins=[origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "https://ldyqxx.github.io").split(",")],
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
@@ -36,35 +37,51 @@ class ForecastResponse(BaseModel):
 
 
 def make_forecast(symbol: str, horizon_days: int) -> ForecastResponse:
-    # Demo-only deterministic series. Replace this function with a trained model
-    # and a licensed market-data provider before using this in production.
-    seed = sum(ord(char) for char in symbol.upper())
-    rng = Random(seed)
-    today = date.today()
-    current = round(60 + (seed % 300) + rng.random() * 30, 2)
-    history = []
-    for offset in range(29, -1, -1):
-        value = current * (1 + 0.025 * sin(offset / 3) + rng.uniform(-0.012, 0.012))
-        history.append(ForecastPoint(date=today - timedelta(days=offset), price=round(value, 2), kind="history"))
-    predicted = round(current * (1 + 0.0018 * horizon_days + rng.uniform(-0.018, 0.018)), 2)
+    """Build a baseline trend forecast from Yahoo Finance adjusted daily closes."""
+    ticker = yf.Ticker(symbol)
+    prices = ticker.history(period="3mo", interval="1d", auto_adjust=True, raise_errors=False)
+    if prices.empty or "Close" not in prices:
+        raise ValueError("未找到该股票代码的可用 Yahoo Finance 行情数据。")
+
+    closes = [float(value) for value in prices["Close"].dropna().tail(30)]
+    dates = [timestamp.date() for timestamp in prices.index[-len(closes):]]
+    if len(closes) < 10:
+        raise ValueError("可用历史行情不足，暂时无法生成预测。")
+
+    current = round(closes[-1], 2)
+    history = [
+        ForecastPoint(date=price_date, price=round(price, 2), kind="history")
+        for price_date, price in zip(dates, closes)
+    ]
+    x_mean = (len(closes) - 1) / 2
+    y_mean = sum(closes) / len(closes)
+    denominator = sum((index - x_mean) ** 2 for index in range(len(closes)))
+    slope = sum((index - x_mean) * (price - y_mean) for index, price in enumerate(closes)) / denominator
+    predicted = round(max(0.01, current + slope * horizon_days), 2)
+    forecast_dates = []
+    next_date = dates[-1]
+    while len(forecast_dates) < horizon_days:
+        next_date += timedelta(days=1)
+        if next_date.weekday() < 5:
+            forecast_dates.append(next_date)
     forecast = [
         ForecastPoint(
-            date=today + timedelta(days=offset),
+            date=forecast_date,
             price=round(current + (predicted - current) * offset / horizon_days, 2),
             kind="forecast",
         )
-        for offset in range(1, horizon_days + 1)
+        for offset, forecast_date in enumerate(forecast_dates, start=1)
     ]
     return ForecastResponse(
         symbol=symbol.upper(),
-        as_of=today,
+        as_of=dates[-1],
         current_price=current,
         predicted_price=predicted,
         change_percent=round((predicted / current - 1) * 100, 2),
-        confidence=round(0.62 + rng.random() * 0.2, 2),
+        confidence=0.0,
         horizon_days=horizon_days,
         points=history + forecast,
-        disclaimer="演示预测仅供研究，不构成投资建议；实际部署前请接入合规数据并完成回测。",
+        disclaimer="价格来自 Yahoo Finance；预测为基于近期收盘价的线性趋势基线，仅供研究，不构成投资建议。",
     )
 
 
@@ -78,7 +95,10 @@ def forecast(
     symbol: str = Query(min_length=1, max_length=10, pattern=r"^[A-Za-z0-9.\-]+$"),
     horizon: int = Query(default=5, ge=1, le=30),
 ) -> ForecastResponse:
-    return make_forecast(symbol, horizon)
+    try:
+        return make_forecast(symbol, horizon)
+    except ValueError as error:
+        return JSONResponse(status_code=404, content={"detail": str(error)})
 
 
 @app.get("/")

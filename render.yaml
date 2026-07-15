@@ -1,8 +1,11 @@
 services:
   - type: web
-    name: quant-forecast-api
+    name: quantlab-forecast-api-ldyqxx
     runtime: python
     rootDir: api
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://ldyqxx.github.io

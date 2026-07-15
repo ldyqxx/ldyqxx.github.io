@@ -1,0 +1,1 @@
+window.QUANT_API_URL = "https://quantlab-forecast-api-ldyqxx.onrender.com";
