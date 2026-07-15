@@ -3,29 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ldyqxx的个人主页</title>
+    <title>QuantLab · 量化预测平台</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .nav { background-color: #f0f0f0; padding: 10px; margin-bottom: 20px; }
-        .nav a { margin: 0 15px; text-decoration: none; color: #333; }
+        :root { --bg:#07111f; --panel:#0d1b2e; --line:#203650; --text:#e7eef8; --muted:#8da1b8; --accent:#53e0b2; --blue:#74a7ff; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; color:var(--text); font:15px Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 85% -10%,#153a52 0,transparent 38%),var(--bg); }
+        .shell { max-width:1180px; margin:auto; padding:28px 22px 44px; }
+        header { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:42px; }
+        .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.5px; }
+        .logo { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; color:#031b16; background:var(--accent); font-weight:900; }
+        nav a { color:var(--muted); text-decoration:none; margin-left:24px; } nav a:first-child, nav a:hover { color:var(--text); }
+        .eyebrow { color:var(--accent); font-size:12px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase; }
+        h1 { max-width:700px; margin:13px 0 14px; font-size:clamp(34px,5vw,64px); line-height:1.04; letter-spacing:-2px; }
+        .intro { max-width:620px; color:var(--muted); font-size:17px; line-height:1.7; }
+        .controls { display:flex; flex-wrap:wrap; gap:10px; margin:27px 0 34px; }
+        input, select, button { border:1px solid var(--line); border-radius:10px; color:var(--text); background:#0a1728; padding:13px 15px; font:inherit; }
+        input { width:145px; text-transform:uppercase; } button { cursor:pointer; border-color:var(--accent); color:#06231b; background:var(--accent); font-weight:800; } button:disabled { opacity:.6; cursor:wait; }
+        .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; } .card { border:1px solid var(--line); border-radius:16px; padding:20px; background:rgba(13,27,46,.86); } .label { color:var(--muted); font-size:13px; } .value { margin-top:10px; font-size:26px; font-weight:750; } .positive { color:var(--accent); }
+        .chart-card { margin-top:14px; padding:22px; } .chart-head { display:flex; align-items:center; justify-content:space-between; gap:12px; } h2 { margin:0; font-size:18px; } #status { color:var(--muted); font-size:13px; } canvas { display:block; width:100%; height:290px; margin-top:20px; }
+        .notice { margin-top:14px; color:var(--muted); font-size:12px; line-height:1.6; } footer { margin-top:38px; color:var(--muted); font-size:12px; }
+        @media (max-width:700px) { header { align-items:flex-start; } nav { display:none; } .grid { grid-template-columns:repeat(2,1fr); } .shell { padding:20px 16px 35px; } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ldyqxx</h1>
-        <p>全栈开发者 | 技术博主</p>
-        <img src="4a54e5ec94e4ef344b3abf28866fb63.jpg"  width="300">
-    </div>
-    <div class="nav">
-        <a href="/">首页</a>
-        <a href="/about.html">关于我</a>
-        <a href="/blog.html">博客</a>
-        <a href="/alien-game.html">外星人游戏</a>
-    </div>
-    <div class="content">
-        <h2>欢迎来到我的个人站点！</h2>
-        <p>这里用于展示我的技术分享和项目经验。</p>
-    </div>
+    <main class="shell">
+        <header><div class="brand"><span class="logo">Q</span><span>QuantLab</span></div><nav><a href="#dashboard">仪表盘</a><a href="#method">方法论</a><a href="/alien-game.html">实验室</a></nav></header>
+        <section id="dashboard"><div class="eyebrow">Research terminal · v1.0</div><h1>用数据，理解市场的下一步。</h1><p class="intro">一个面向研究者的轻量化量化预测工作台。输入股票代码，查看模型预测、历史走势与置信度。</p>
+            <div class="controls"><input id="symbol" value="AAPL" aria-label="股票代码"><select id="horizon" aria-label="预测周期"><option value="5">未来 5 个交易日</option><option value="10">未来 10 个交易日</option><option value="20">未来 20 个交易日</option></select><button id="run">运行预测 →</button></div>
+            <section class="grid"><div class="card"><div class="label">当前价格</div><div class="value" id="current">—</div></div><div class="card"><div class="label">预测价格</div><div class="value" id="predicted">—</div></div><div class="card"><div class="label">预期变化</div><div class="value positive" id="change">—</div></div><div class="card"><div class="label">模型置信度</div><div class="value" id="confidence">—</div></div></section>
+            <section class="card chart-card"><div class="chart-head"><h2 id="chartTitle">价格路径</h2><span id="status">准备就绪</span></div><canvas id="chart" width="1100" height="290"></canvas></section>
+            <p class="notice">⚠ 预测结果仅用于研究与教育，不构成投资建议，也不保证未来收益。演示数据不是实时行情。</p>
+        </section>
+        <footer id="method">QuantLab Research · 在生产环境中请接入合规行情源、经过验证的模型和严格的风险管理。</footer>
+    </main>
+    <script>
+        const API_URL = window.QUANT_API_URL || "";
+        const $ = id => document.getElementById(id);
+        function draw(points) { const canvas=$('chart'), ctx=canvas.getContext('2d'), w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h); const values=points.map(p=>p.price), min=Math.min(...values)*.995, max=Math.max(...values)*1.005; const x=i=>35+i*(w-55)/(values.length-1), y=v=>h-28-(v-min)*(h-55)/(max-min||1); ctx.strokeStyle='#203650'; ctx.lineWidth=1; for(let i=0;i<4;i++){let gy=25+i*75;ctx.beginPath();ctx.moveTo(35,gy);ctx.lineTo(w,gy);ctx.stroke();} ctx.lineWidth=3; ctx.beginPath(); points.forEach((p,i)=>{i?ctx.lineTo(x(i),y(p.price)):ctx.moveTo(x(i),y(p.price));}); ctx.strokeStyle='#74a7ff'; ctx.stroke(); const split=points.findIndex(p=>p.kind==='forecast'); if(split>0){ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(x(split),20);ctx.lineTo(x(split),h-28);ctx.strokeStyle='#53e0b2';ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='#53e0b2';ctx.beginPath();points.slice(split).forEach((p,j)=>{const i=j+split;i?ctx.lineTo(x(i),y(p.price)):ctx.moveTo(x(i),y(p.price));});ctx.stroke();} }
+        async function run() { const symbol=$('symbol').value.trim().toUpperCase(); const horizon=$('horizon').value; if(!symbol)return; $('run').disabled=true; $('status').textContent='计算中…'; try { const res=await fetch(`${API_URL}/api/forecast?symbol=${encodeURIComponent(symbol)}&horizon=${horizon}`); if(!res.ok)throw Error(); const data=await res.json(); render(data); $('status').textContent=`${data.symbol} · 截止 ${data.as_of}`; } catch { const data=demo(symbol,Number(horizon)); render(data); $('status').textContent='离线演示模式'; } finally {$('run').disabled=false;} }
+        function demo(symbol,horizon){let base=100+(symbol.charCodeAt(0)%30),points=[];for(let i=0;i<30;i++)points.push({price:base+Math.sin(i/3)*4+i*.12,kind:'history'});for(let i=1;i<=horizon;i++)points.push({price:base+3+i*.35,kind:'forecast'});return{symbol,current_price:base+3,predicted_price:base+3+horizon*.35,change_percent:horizon*.32,confidence:.71,points,as_of:new Date().toISOString().slice(0,10)}}
+        function render(data){$('chartTitle').textContent=`${data.symbol} · 价格路径`;$('current').textContent=`$${data.current_price.toFixed(2)}`;$('predicted').textContent=`$${data.predicted_price.toFixed(2)}`;$('change').textContent=`${data.change_percent>=0?'+':''}${data.change_percent.toFixed(2)}%`;$('confidence').textContent=`${(data.confidence*100).toFixed(0)}%`;draw(data.points)}
+        $('run').addEventListener('click',run); $('symbol').addEventListener('keydown',e=>e.key==='Enter'&&run()); run();
+    </script>
 </body>
 </html>
